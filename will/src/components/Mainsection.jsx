@@ -1,14 +1,14 @@
-import React from 'react'
-import Sidebar from './Sidebar'
-import Dashboard from './Dashboard'
+import React from "react";
+import Sidebar from "./Sidebar";
+import Dashboard from "./Dashboard";
 
-const Mainsection = ({displayTab, display, postList}) => {
+const Mainsection = () => {
   return (
-    <div style={{display: "flex"}}>
-      <Sidebar displayTab={displayTab} display={display}/>
-      <Dashboard display={display} postList={postList}/>
+    <div style={{ display: "flex" }}>
+      <Sidebar  />
+      <Dashboard    />
     </div>
-  )
-}
+  );
+};
 
-export default Mainsection
+export default Mainsection;

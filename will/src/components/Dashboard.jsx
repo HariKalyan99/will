@@ -1,11 +1,15 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import Postlist from './Postlist'
 import Createform from './Createform'
+import { willStore } from '../store/Willstore'
 
-const Dashboard = ({display, postList}) => {
+const Dashboard = () => {
+  
+  const {display} = useContext(willStore)
+
   return (
     <div style={{width: "100%"}}>
-        {display === "postList" ? <Postlist postList={postList}/> : <Createform />}
+        {display === "postList" ? <Postlist   /> : <Createform  />}
     </div>
   )
 }
