@@ -1,4 +1,4 @@
-import { createContext } from "react";
+import { createContext, useReducer } from "react";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
@@ -12,13 +12,31 @@ export const willStore = createContext({
     postList: [],
   })
 
+  const pureReducerFunction = (currentState, action) => {
+    let newPostListFromReducer = currentState;
+    if(action.type === "INITIAL_POSTS"){
+      newPostListFromReducer = action.payload.data;
+    }else if(action.type === "ADD_POST"){
+      newPostListFromReducer = [action.payload.data, ...currentState]
+    }else if(action.type === "DEL_POST"){
+      newPostListFromReducer =  currentState.filter((post) => post.id !== action.payload.id);
+    }else if(action.type === "EDIT_POST"){
+      let newPostList = currentState.filter((post) => post.id !== action.payload.id);
+      newPostListFromReducer =  [action.payload.data, ...newPostList];
+    }
+    return newPostListFromReducer;
+  }
+
 
 const WillStoreContextProvider = ({children}) => {
   const [display, setDisplay] = useState("createPost");
   const [addPost, setAddPost] = useState("");
   const [delPost, setDelPost] = useState("");
   const [editPost, setEditPost] = useState("");
-  const [postList, setPostList] = useState([]);
+  // const [postList, setPostList] = useState([]);
+
+
+  const [postList, dispatchPostlist] = useReducer(pureReducerFunction, []);
 
 
 
@@ -33,7 +51,9 @@ const WillStoreContextProvider = ({children}) => {
     const fetchApi = async () => {
       try {
         const { data } = await axios.get(`http://localhost:8081/posts`, signal);
-        setPostList(data);
+        dispatchPostlist({type: "INITIAL_POSTS", payload: {
+          data,
+        }})
       } catch (err) {
         console.log("Error", err);
       }
@@ -58,7 +78,13 @@ const WillStoreContextProvider = ({children}) => {
           tags,
           reactions,
         });
-        setPostList([data, ...postList]);
+        
+        dispatchPostlist({
+          type: "ADD_POST",
+          payload: {
+            data,
+          }
+        })
       };
     } catch (error) {
       console.log("Error", error);
@@ -78,8 +104,13 @@ const WillStoreContextProvider = ({children}) => {
     try {
       fetchDeletePost = async (id) => {
         await axios.delete(`http://localhost:8081/posts/${id}`);
-        let newPostList = postList.filter((post) => post.id !== id);
-        setPostList(newPostList);
+        dispatchPostlist({
+          type: "DEL_POST",
+          payload: {
+            id
+          }
+        })
+      
       };
     } catch (error) {
       console.log("Error", error);
@@ -104,8 +135,14 @@ const WillStoreContextProvider = ({children}) => {
           tags,
           reactions
         });
-        let newPostList = postList.filter((post) => post.id !== id);
-        setPostList([data, ...newPostList]);
+        dispatchPostlist({
+          type: "EDIT_POST",
+          payload: {
+            id,
+            data
+          }
+        })
+
       };
     } catch (error) {
       console.log("Error", error);
